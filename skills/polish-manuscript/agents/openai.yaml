@@ -1,0 +1,4 @@
+interface:
+  display_name: "Polish Manuscript"
+  short_description: "Audit and restructure manuscript sections rigorously"
+  default_prompt: "Use $polish-manuscript to audit dependencies, then tighten or restructure the requested passage within explicit mathematical scope and the current project state."

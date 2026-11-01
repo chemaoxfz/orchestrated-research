@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+.DS_Store
+
+# Working notes and private terms stay local.
+.claude/handoff.md
+.claude/settings.local.json
+leak-terms.local.txt
+skills/*/references/*.local.md

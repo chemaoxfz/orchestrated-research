@@ -1,0 +1,79 @@
+% Shared preamble for the tutorial and the technical companion.
+% Keep notation aligned with guidance/NOTATION.md.
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[scale=.9]{tgheros}
+\usepackage[margin=.85in,headheight=14pt]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools,bm}
+\usepackage{graphicx,microtype,booktabs,array,longtable,tabularx,multirow}
+\usepackage{enumitem,caption,needspace,placeins}
+\usepackage[table]{xcolor}
+\usepackage[breakable]{tcolorbox}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,calc}
+
+% Default palette: the Okabe-Ito marks and light fills of them. Replace it to taste, in one place.
+\definecolor{ink}{HTML}{222222}
+\definecolor{structural}{HTML}{777777}
+\definecolor{leader}{HTML}{B0B0B0}
+\definecolor{markblue}{HTML}{0072B2}
+\definecolor{markvermillion}{HTML}{D55E00}
+\definecolor{markgreen}{HTML}{009E73}
+\definecolor{markpurple}{HTML}{CC79A7}
+\definecolor{markorange}{HTML}{E69F00}
+\definecolor{marksky}{HTML}{56B4E9}
+\definecolor{fillblue}{HTML}{D9EAF3}
+\definecolor{fillvermillion}{HTML}{F9E7D9}
+\definecolor{fillgreen}{HTML}{D9F0EA}
+\definecolor{fillpurple}{HTML}{F7EBF2}
+\definecolor{fillorange}{HTML}{FBF1D9}
+\definecolor{fillsky}{HTML}{E6F4FC}
+
+\usepackage[colorlinks=true,linkcolor=markblue,urlcolor=markgreen,citecolor=markgreen]{hyperref}
+\usepackage[nameinlink,noabbrev]{cleveref}
+
+% A procedure step, always in brackets: \procstep{Fit}.
+\DeclareRobustCommand{\procstep}[1]{\mbox{\textup{[#1]}}}
+
+% Thin body rules that only guide the eye. Top, header and bottom rules stay full booktabs.
+\newcommand{\rowguide}{\arrayrulecolor{leader}\midrule[.15pt]\arrayrulecolor{ink}}
+\newcommand{\rowguidepart}[1]{\arrayrulecolor{leader}\cmidrule[.15pt](lr){#1}\arrayrulecolor{ink}}
+
+% Plain, fixed-size arrowheads, whose tips do not grow with line width.
+\tikzset{>={Triangle[length=3.2pt,width=3pt]}}
+
+% A recipe box holds only the short usable rule. Definitions and motivation go before it.
+\newenvironment{recipe}[1]
+  {\begin{tcolorbox}[breakable,colback=fillblue,colframe=markblue,boxrule=.5pt,arc=1pt,left=7pt,right=7pt,top=5pt,bottom=5pt,title={#1},fonttitle=\sffamily\bfseries]}
+  {\end{tcolorbox}}
+
+% Unfinished work: a design and a falsifiable expected outcome, never a fabricated result.
+\newenvironment{resulttodo}[1]
+  {\begin{tcolorbox}[breakable,colback=fillorange,colframe=structural,boxrule=.5pt,arc=1pt,left=7pt,right=7pt,top=5pt,bottom=5pt,title={Result to complete: #1},fonttitle=\sffamily\bfseries]}
+  {\end{tcolorbox}}
+
+\newtheoremstyle{statement}{\topsep}{\topsep}{\itshape}{}{\sffamily\bfseries}{.}{.5em}{}
+\newtheoremstyle{exposition}{\topsep}{\topsep}{}{}{\sffamily\bfseries}{.}{.5em}{}
+\theoremstyle{statement}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{exposition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{observation}[theorem]{Observation}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{remark}[theorem]{Remark}
+
+% An optional link from the tutorial's opening to the companion, and the anchors at the companion's statements.
+\newcommand{\techfile}{{{SLUG}}-technical.pdf}
+\newcommand{\techref}[2][companion]{\href{\techfile\#tech.#2}{#1}}
+\newcommand{\techanchor}[1]{\hypertarget{tech.#1}{}}
+
+\setlist{nosep,leftmargin=1.6em,topsep=4pt}
+\setlength{\parindent}{1em}
+\setlength{\parskip}{5pt plus 1pt minus 1pt}
+\setlength{\emergencystretch}{1.5em}
+\captionsetup{font=small,labelfont=bf,skip=5pt}

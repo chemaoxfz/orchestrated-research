@@ -1,0 +1,4 @@
+interface:
+  display_name: "Simplify Rules"
+  short_description: "Find what decides, then merge and restate the rules"
+  default_prompt: "Use $simplify-rules to find the simpler rule in this section, merge rules that apply the same test, and carry the change through its examples and figures."

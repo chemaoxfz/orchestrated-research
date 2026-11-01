@@ -1,0 +1,20 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "orchestrated-research",
+  "description": "Single-plugin marketplace for the orchestrated-research skills.",
+  "owner": {
+    "name": "chemaoxfz",
+    "url": "https://github.com/chemaoxfz"
+  },
+  "plugins": [
+    {
+      "name": "orchestrated-research",
+      "description": "Run a long research project as an orchestrator of dedicated agents, in stages, delivering a tutorial written like the main text of a high-impact paper and a technical companion with every derivation, proof and computation.",
+      "version": "0.1.0",
+      "author": { "name": "chemaoxfz" },
+      "source": "./",
+      "category": "productivity",
+      "homepage": "https://github.com/chemaoxfz/orchestrated-research"
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+__pycache__/
+*.pyc
+.DS_Store
+.build/
+*.synctex.gz
+.claude/prompt-log.md
+.claude/settings.local.json
+roles/*/runs/
+roles/*/.lock
+roles/*/last-reply.md
+
+# Keep the data policy and manifests in git, not the bytes.
+data/*
+!data/README.md
+!data/*/
+data/*/*
+!data/*/MANIFEST.md

@@ -1,0 +1,12 @@
+{
+  "name": "orchestrated-research",
+  "version": "0.1.0",
+  "description": "Run a long research project as an orchestrator of dedicated agents, in stages, delivering a tutorial written like the main text of a high-impact paper and a technical companion with every derivation, proof and computation.",
+  "author": {
+    "name": "chemaoxfz",
+    "url": "https://github.com/chemaoxfz"
+  },
+  "homepage": "https://github.com/chemaoxfz/orchestrated-research",
+  "repository": "https://github.com/chemaoxfz/orchestrated-research",
+  "keywords": ["research", "orchestration", "agents", "writing", "science"]
+}

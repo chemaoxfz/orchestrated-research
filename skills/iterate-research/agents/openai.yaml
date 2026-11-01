@@ -1,0 +1,4 @@
+interface:
+  display_name: "Iterate Research"
+  short_description: "Develop, write, review, and choose the next research step"
+  default_prompt: "Use $iterate-research to develop this idea into a reviewed writeup, choose the next useful investigation, and iterate for up to 90 minutes."

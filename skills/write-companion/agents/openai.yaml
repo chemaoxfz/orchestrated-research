@@ -1,0 +1,4 @@
+interface:
+  display_name: "Write Companion"
+  short_description: "Write the technical companion that proves every claim"
+  default_prompt: "Use $write-companion to work out, prove and record the evidence behind this tutorial."

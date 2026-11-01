@@ -1,0 +1,4 @@
+interface:
+  display_name: "Orchestrate Agents"
+  short_description: "Orchestrate writer agents and review their deliveries"
+  default_prompt: "Use $orchestrate-agents to orchestrate the writers of this project, review each delivery first-hand and keep a resumable handoff."

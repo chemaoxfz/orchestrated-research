@@ -1,0 +1,4 @@
+interface:
+  display_name: "Orchestrated Research"
+  short_description: "Run research with dedicated agents and paired documents"
+  default_prompt: "Use $orchestrated-research to run this project in stages, with dedicated writers for a tutorial and a technical companion."

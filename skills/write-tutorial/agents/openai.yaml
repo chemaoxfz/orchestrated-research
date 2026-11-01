@@ -1,0 +1,4 @@
+interface:
+  display_name: "Write Tutorial"
+  short_description: "Write a tutorial like a high-impact main text"
+  default_prompt: "Use $write-tutorial to write or review this tutorial as the main text of a high-impact paper."
