@@ -3,6 +3,7 @@
 The system is a textbook one, so nothing here depends on any project.
 It shows one piece of material written three ways: a draft with typical defects, the tutorial version, and the companion version.
 Calibrate on the difference, not on the topic.
+Paths, ledger rows and figure numbers inside the quotes are placeholders for a real project's. None of them exists in this repository.
 
 ## The draft, with the defects it has
 
@@ -25,7 +26,7 @@ Calibrate on the difference, not on the topic.
 
 > **When does an enzyme stop responding to its substrate?**
 > An enzyme responds to its substrate at low substrate and ignores it at high substrate.
-> The switch happens where one ratio crosses one.
+> The crossover between the two is centered where one ratio equals one.
 > That ratio is the substrate concentration divided by the Michaelis constant.
 >
 > **The substrate concentration decides through a single comparison.**
@@ -37,17 +38,20 @@ Calibrate on the difference, not on the topic.
 > The denominator is a sum of two terms, and the larger one sets the rate.
 > Compare them through the ratio $\rho = S/K_M$.
 >
-> **The ratio gives two outcomes, each with its condition.**
+> **The ratio gives two outcomes, each with its condition and its accuracy.**
 > The two cases follow from which term of the denominator is larger.
 >
-> | Outcome | Condition | Leading-order rate | Leading-order gain of $v$ in $S$ |
-> | --- | --- | --- | --- |
-> | Unsaturated enzyme | $\rho < 1$ | $(k_{\mathrm{cat}}/K_M) E S$ | $1$ |
-> | Saturated enzyme | $\rho > 1$ | $k_{\mathrm{cat}} E$ | $0$ |
+> | Outcome | Condition | Leading-order rate | Relative error of that rate | Leading-order gain of $v$ in $S$ |
+> | --- | --- | --- | --- | --- |
+> | Unsaturated enzyme | $\rho \le 1$ | $(k_{\mathrm{cat}}/K_M) E S$ | $\rho$ | $1$ |
+> | Saturated enzyme | $\rho > 1$ | $k_{\mathrm{cat}} E$ | $1/\rho$ | $0$ |
 >
+> Each leading-order rate is accurate only far from the crossover.
+> At $\rho = 0.1$ the unsaturated rate is 10% too high, and at $\rho = 1$ both rates are twice the exact rate.
 > Here the gain is $\mathrm{d}\log v/\mathrm{d}\log S$, the slope of the response on log-log axes.
+> Its exact value is $1/(1+\rho)$.
 >
-> [Recipe box: **Read a saturation response.** *Supplied:* $S$, $K_M$, $k_{\mathrm{cat}}$ and $E$, with $E \ll S + K_M$. 1. Compute $\rho = S/K_M$. 2. If $\rho < 1$, the leading-order rate is $(k_{\mathrm{cat}}/K_M)ES$ and the leading-order gain is $1$. 3. If $\rho > 1$, the leading-order rate is $k_{\mathrm{cat}}E$ and the leading-order gain is $0$. *Returns:* the outcome and its leading-order rate. *Next:* compare the leading-order rate with other rates in the system. *Check:* the two leading-order rates agree at $\rho = 1$.]
+> [Recipe box: **Read a saturation response.** *Supplied:* $S$, $K_M$, $k_{\mathrm{cat}}$ and $E$, with $E \ll S + K_M$. 1. Compute $\rho = S/K_M$. 2. If $\rho \le 1$, the leading-order rate is $(k_{\mathrm{cat}}/K_M)ES$, with relative error $\rho$. 3. If $\rho > 1$, the leading-order rate is $k_{\mathrm{cat}}E$, with relative error $1/\rho$. 4. If that error is too large for the use at hand, use the exact rate $k_{\mathrm{cat}}E\rho/(1+\rho)$. *Returns:* the outcome, a rate and its relative error. *Next:* compare the rate with other rates in the system. *Check:* the two leading-order rates agree at $\rho = 1$, where each is twice the exact rate.]
 >
 > Figure 1 shows the response. The thin lines are the two leading-order rates. They meet at $S = K_M$, where the broad exact curve lies a factor of two below them.
 
@@ -58,6 +62,7 @@ Calibrate on the difference, not on the topic.
 | "We vary $S$ and hold... fixed" comes first | Say what varies and what is fixed |
 | The ratio $\rho$ earns its symbol by carrying both conditions | A symbol names a defined object used repeatedly |
 | Each outcome has its condition | A condition for every outcome |
+| Each leading-order rate carries its error, the conditions cover $\rho = 1$, and the change is called a crossover | An approximate result states its regime and its accuracy |
 | No derivation of the rate law appears, and no pointer to one | The reader accepts the statement. This is the main text. |
 | The exact factor of two is a check the reader can see, read from the figure | The text reads the picture |
 | The scarce-enzyme hypothesis appears once, where it buys the calculation, and its justification is in the companion | Motivate an assumption by what it buys, and keep every hypothesis the reader needs |

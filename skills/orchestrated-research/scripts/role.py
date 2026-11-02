@@ -24,6 +24,7 @@ It runs one turn at a time per role, and it never resends after a failed or ambi
 Standard library only. Python 3.9 or later.
 """
 import argparse
+import contextlib
 import datetime as dt
 import json
 import os
@@ -34,8 +35,14 @@ import sys
 import tempfile
 from pathlib import Path
 
+try:
+    import fcntl
+except ImportError:  # Windows. Then run one roster change at a time.
+    fcntl = None
+
 BACKENDS = ("codex", "claude", "dsh", "codex-live", "manual")
 SENDER_RE = re.compile(r"^From [^:\n]{1,60}:")
+ROLE_NAME_RE = re.compile(r"[a-z0-9][a-z0-9-]{0,47}")
 # `claude -p` cannot ask for approval. A writer needs its build and check commands allowed in advance.
 # Running project code is the project's choice: add it with `set ROLE --args --allowedTools ...`.
 CLAUDE_TOOLS = ["Bash(latexmk *)", "Bash(python3 tools/records.py *)", "Bash(shasum *)", "Bash(sha256sum *)",
@@ -54,6 +61,20 @@ LATER_TURN = """If your context was compacted, re-read roles/{role}/CHARTER.md, 
 Update roles/{role}/HANDOFF.md before you end this turn.
 
 {message}
+"""
+
+# `claude --agent NAME` loads .claude/agents/NAME.md. A role added later gets this plain definition.
+CLAUDE_AGENT = """---
+name: {role}
+description: Dedicated {role} of this research project. Keeps its own memory and handoff across sessions.
+memory: project
+---
+You are the dedicated {role} of this project.
+Your identity lives in files, not in this conversation.
+Before acting, read `roles/{role}/CHARTER.md` and `roles/{role}/HANDOFF.md`, then `AGENTS.md` and `PROJECT_STATE.md`.
+Your memory folder is `roles/{role}/`. Keep `MEMORY.md` there current, as a short list of durable lessons.
+Before you end each turn, update `roles/{role}/HANDOFF.md`.
+A message that starts "From <sender>:" is not an author prompt unless it says it relays one.
 """
 
 
@@ -86,6 +107,15 @@ def save_roster(project, roster):
         json.dump(roster, handle, indent=2, sort_keys=True)
         handle.write("\n")
     os.replace(tmp, path)
+
+
+@contextlib.contextmanager
+def roster_lock(project):
+    """Hold roles/.roster.lock across one read-modify-write, so parallel turns keep each other's changes."""
+    with open(project / "roles" / ".roster.lock", "a") as handle:
+        if fcntl:
+            fcntl.flock(handle, fcntl.LOCK_EX)
+        yield
 
 
 def get_role(roster, name):
@@ -131,6 +161,37 @@ def role_env(role):
     for key, value in (role.get("env") or {}).items():
         env[key] = os.path.expanduser(value)
     return env
+
+
+def ensure_claude_agent(project, name):
+    """Write .claude/agents/<name>.md if it is missing, and point its memory at the role folder."""
+    path = project / ".claude" / "agents" / f"{name}.md"
+    try:
+        if not path.exists():
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(CLAUDE_AGENT.format(role=name), encoding="utf-8")
+            print(f"wrote {path.relative_to(project)}. Add the skills this role uses to its frontmatter.")
+        link = project / ".claude" / "agent-memory" / name
+        if not (link.exists() or link.is_symlink()):
+            link.parent.mkdir(parents=True, exist_ok=True)
+            os.symlink(Path("..") / ".." / "roles" / name, link, target_is_directory=True)
+    except OSError as exc:
+        print(f"warning: could not set up {path}: {exc}. Write it yourself before the role's first turn on claude.", file=sys.stderr)
+
+
+def next_step(name, role):
+    """Say in one line what the next send does for this role."""
+    backend = role["backend"]
+    if backend == "codex-live":
+        if role.get("thread"):
+            return f"{name}: the next send queues to live thread {role['thread']}."
+        return (f"{name}: start a live Codex session for this role, and make its first message tell it to read "
+                f"roles/{name}/CHARTER.md, MEMORY.md and HANDOFF.md. Then bind it with `set {name} --thread UUID`.")
+    if backend == "manual":
+        return f"{name}: the next send hands the message to you. Give a new session roles/{name}/ to read first."
+    if role.get("thread"):
+        return f"{name}: the next send resumes {backend} thread {role['thread']}."
+    return f"{name}: the next send starts a new {backend} thread from roles/{name}/."
 
 
 def build_command(name, role, project):
@@ -256,7 +317,7 @@ def cmd_send(args):
         die('a message must start with "From <sender>:", so the receiver does not log it as an author prompt.')
     folder = project / "roles" / args.role
     (folder / "runs").mkdir(parents=True, exist_ok=True)
-    stamp = dt.datetime.now().strftime("%Y%m%d-%H%M%S")
+    stamp = dt.datetime.now().strftime("%Y%m%d-%H%M%S-%f")
     log = folder / "runs" / f"{stamp}.log"
     backend = role["backend"]
     entry = {"time": now(), "message_file": str(path), "backend": backend, "thread_before": role.get("thread"), "log": str(log.relative_to(project))}
@@ -306,16 +367,17 @@ def cmd_send(args):
         log.write_text(out + "\n--- stderr ---\n" + err, encoding="utf-8")
         thread, reply, failed = PARSERS[backend](out)
 
-        # Re-read the roster, in case another role changed it during this long turn.
-        roster = load_roster(project)
-        role = get_role(roster, args.role)
-        if thread and thread != role.get("thread"):
-            if role.get("thread"):
-                role.setdefault("history", []).append({"thread": role["thread"], "ended": now(), "reason": "backend returned a new thread"})
-            role["thread"] = thread
-        ok = code == 0 and not failed and bool(reply)
-        role["last_turn"] = {"time": now(), "status": "ok" if ok else "failed", "message_file": str(path), "log": entry["log"]}
-        save_roster(project, roster)
+        # Re-read the roster under its lock, because another role may have changed it during this long turn.
+        with roster_lock(project):
+            roster = load_roster(project)
+            role = get_role(roster, args.role)
+            if thread and thread != role.get("thread"):
+                if role.get("thread"):
+                    role.setdefault("history", []).append({"thread": role["thread"], "ended": now(), "reason": "backend returned a new thread"})
+                role["thread"] = thread
+            ok = code == 0 and not failed and bool(reply)
+            role["last_turn"] = {"time": now(), "status": "ok" if ok else "failed", "message_file": str(path), "log": entry["log"]}
+            save_roster(project, roster)
         if reply:
             (folder / "last-reply.md").write_text(reply + "\n", encoding="utf-8")
         record_turn(project, args.role, {**entry, "thread_after": role.get("thread"), "exit": code, "status": "ok" if ok else "failed", "failed": failed})
@@ -352,7 +414,11 @@ def cmd_reply(args):
 def apply_settings(role, args):
     backend = getattr(args, "backend", None)
     if backend and backend != role["backend"]:
-        # A model name and flags belong to one vendor. Carried over, they break the first turn on the next.
+        # A thread, a model name and flags belong to one vendor. Carried over, they break the first turn on the next.
+        if role.get("thread"):
+            role.setdefault("history", []).append({"thread": role["thread"], "ended": now(), "reason": f"moved from {role['backend']} to {backend}"})
+            print(f"moving from {role['backend']} to {backend}: thread {role['thread']} moved to the roster's history.")
+            role["thread"] = None
         cleared = [key for key in ("model", "args") if role.get(key)]
         if cleared:
             print(f"moving from {role['backend']} to {backend}: cleared {' and '.join(cleared)}. Set them again if needed.")
@@ -367,55 +433,68 @@ def apply_settings(role, args):
 
 def cmd_set(args):
     project = Path(args.project).resolve() if args.project else find_project()
-    roster = load_roster(project)
-    role = get_role(roster, args.role)
-    apply_settings(role, args)
-    if args.thread:
-        if role.get("thread") and role["thread"] != args.thread:
-            role.setdefault("history", []).append({"thread": role["thread"], "ended": now(), "reason": "replaced with set"})
-        role["thread"] = args.thread
-    if args.status:
-        role["status"] = args.status
-    if args.args is not None:
-        role["args"] = args.args
-    save_roster(project, roster)
+    with roster_lock(project):
+        roster = load_roster(project)
+        role = get_role(roster, args.role)
+        apply_settings(role, args)
+        if args.thread:
+            if role.get("thread") and role["thread"] != args.thread:
+                role.setdefault("history", []).append({"thread": role["thread"], "ended": now(), "reason": "replaced with set"})
+            role["thread"] = args.thread
+        if args.status:
+            role["status"] = args.status
+        if args.args is not None:
+            role["args"] = args.args
+        save_roster(project, roster)
+    if role["backend"] == "claude":
+        ensure_claude_agent(project, args.role)
     print(json.dumps({args.role: role}, indent=2))
+    print(next_step(args.role, role))
     return 0
 
 
 def cmd_add(args):
     project = Path(args.project).resolve() if args.project else find_project()
-    roster = load_roster(project)
-    if args.role in roster["roles"]:
-        die(f"{args.role} already exists.")
-    roster["roles"][args.role] = new_role(args.backend)
-    folder = project / "roles" / args.role
-    folder.mkdir(parents=True, exist_ok=True)
-    stubs = {
-        "CHARTER.md": f"# Charter: {args.role}\n\nJob:\n\nOwns these files, and only this role edits them:\n\nDoes not touch:\n\nDelivers:\n",
-        "MEMORY.md": f"# Memory: {args.role}\n\nDurable lessons, one line each, with their origin. Replace a superseded lesson instead of appending.\n",
-        "HANDOFF.md": f"# Handoff: {args.role}\n\nCurrent state, open items and the exact next step. Newest entry last.\n",
-    }
-    for filename, text in stubs.items():
-        if not (folder / filename).exists():
-            (folder / filename).write_text(text, encoding="utf-8")
-    save_roster(project, roster)
+    if not ROLE_NAME_RE.fullmatch(args.role):
+        die("a role name uses lowercase letters, digits and hyphens, such as figure-writer.")
+    with roster_lock(project):
+        roster = load_roster(project)
+        if args.role in roster["roles"]:
+            die(f"{args.role} already exists.")
+        roster["roles"][args.role] = new_role(args.backend)
+        folder = project / "roles" / args.role
+        folder.mkdir(parents=True, exist_ok=True)
+        stubs = {
+            "CHARTER.md": f"# Charter: {args.role}\n\nJob:\n\nOwns these files, and only this role edits them:\n\nDoes not touch:\n\nDelivers:\n",
+            "MEMORY.md": f"# Memory: {args.role}\n\nDurable lessons, one line each, with their origin. Replace a superseded lesson instead of appending.\n",
+            "HANDOFF.md": f"# Handoff: {args.role}\n\nCurrent state, open items and the exact next step. Newest entry last.\n",
+        }
+        for filename, text in stubs.items():
+            if not (folder / filename).exists():
+                (folder / filename).write_text(text, encoding="utf-8")
+        save_roster(project, roster)
+    if args.backend == "claude":
+        ensure_claude_agent(project, args.role)
     print(f"added {args.role} on {args.backend}. Fill in {folder / 'CHARTER.md'} before its first turn.")
+    print(next_step(args.role, roster["roles"][args.role]))
     return 0
 
 
 def cmd_rehydrate(args):
     """Drop the thread, keep the files. The next send starts fresh from the durable record."""
     project = Path(args.project).resolve() if args.project else find_project()
-    roster = load_roster(project)
-    role = get_role(roster, args.role)
-    if role.get("thread"):
-        role.setdefault("history", []).append({"thread": role["thread"], "ended": now(), "reason": args.reason or "rehydrate"})
-    role["thread"] = None
-    role["status"] = "active"
-    apply_settings(role, args)
-    save_roster(project, roster)
-    print(f"{args.role}: the next send starts a new {role['backend']} thread from roles/{args.role}/. Superseded threads stay in the roster's history.")
+    with roster_lock(project):
+        roster = load_roster(project)
+        role = get_role(roster, args.role)
+        if role.get("thread"):
+            role.setdefault("history", []).append({"thread": role["thread"], "ended": now(), "reason": args.reason or "rehydrate"})
+        role["thread"] = None
+        role["status"] = "active"
+        apply_settings(role, args)
+        save_roster(project, roster)
+    if role["backend"] == "claude":
+        ensure_claude_agent(project, args.role)
+    print(f"{next_step(args.role, role)} Superseded threads stay in the roster's history.")
     return 0
 
 

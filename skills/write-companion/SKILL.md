@@ -1,8 +1,9 @@
 ---
 name: write-companion
 description: Write or review the technical companion of a research project, the document where every statement of the tutorial gets its argument. Holds derivations, proofs, algorithm details, computations, complete tables, exact scope and reproducible results. Use whenever you write, extend or audit a supplement or technical companion, record computational results, or prove claims for a paired tutorial or paper. The tutorial's rules on what to leave out do not apply here.
+license: MIT
 metadata:
-  version: "0.1.0"
+  version: "0.2.0"
   source: "https://github.com/chemaoxfz/orchestrated-research"
 ---
 
@@ -34,7 +35,7 @@ Investigate first. Only after a full understanding should a claim go into any do
 
 - **Treat every suggestion as a claim,** including the author's. Test it at its stated scope. A refuted suggestion is a useful result, so report it plainly with its counterexample and the corrected statement.
 - **Give each claim a status** in `TECHNICAL-DESIGN.md`: CONJECTURED, OBSERVED (computation or data support it and nothing proves it), PROVED, REFUTED with a counterexample, or NEEDS SCOPE with the corrected statement.
-- **Separate premises, conjectures, observations and proved conclusions.** They must never share a label. `macro.tex` has an environment for each kind of statement.
+- **Separate assumptions, conjectures, observations and proved conclusions.** They must never share a label. `macro.tex` has an environment for each: `assumption`, `conjecture`, `observation`, and `theorem`, `proposition`, `lemma` or `corollary` for a proved conclusion.
 - **A computation challenges a proof, and does not replace it.** It can refute a general claim. It cannot establish one, unless it is an exhaustive enumeration of a finite case, and then it says so.
 - **For a classification, prove both realization and exclusion.** For an attainable set, prove both containment and realization.
 - **For a reduction, state what is preserved, what is lost, and how to reconstruct the output.**
@@ -98,7 +99,8 @@ Every empirical or computational number has a row in `RESULTS-LEDGER.md`. Number
 | Script and command | What regenerates it |
 | Result file with checksum | Where it is |
 
-Published values get rows too, marked real and compared, with page locators.
+Published values get rows too, with page locators, marked compared.
+A published measurement is real, and a published simulation is synthetic.
 A row is not edited after it is cited. A correction adds a new row and marks the old one superseded.
 
 - **Report across seeds or noise draws,** with medians and worst cases. Keep all attempts, and keep the record of the one that failed.

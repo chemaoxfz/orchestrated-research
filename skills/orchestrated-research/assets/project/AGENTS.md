@@ -13,7 +13,7 @@ The owner makes the edit. Everyone else sends a numbered suggestion to the owner
 
 | Owner | Files |
 | --- | --- |
-| Orchestrator | `PROJECT_STATE.md`, `AUTHOR-LEDGER.md`, `GOAL-RUN.md`, `roles/orchestrator/`, `revisions/orchestrator/` |
+| Orchestrator | `AGENTS.md`, `CLAUDE.md`, `PROJECT_STATE.md`, `AUTHOR-LEDGER.md`, `GOAL-RUN.md`, every `roles/<role>/CHARTER.md`, `roles/orchestrator/`, `revisions/orchestrator/` |
 | Tutorial writer | `{{TUTORIAL}}`, tutorial figures, `TUTORIAL-DESIGN.md`, `AUTHOR-PREFERENCES.md`, shared macros |
 | Technical writer | `{{TECHNICAL}}`, `TECHNICAL-DESIGN.md`, `guidance/NOTATION.md`, `RESULTS-LEDGER.md`, `code/`, `data/`, technical figures |
 | Whoever receives an author prompt | Appends it once, verbatim, to `PROMPT-LOG.md` |

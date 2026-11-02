@@ -32,7 +32,7 @@ Stop time, and whether the author set it as a limit or a minimum:
 
 Finishing the ledger does not end the review.
 Look for the simpler story at section level, not only for defects.
-After each author correction, name the aim behind it, send it as a whole-document pass, and record it.
+After every two or three author corrections, name the aim they share, send it as a whole-document pass, and record it.
 Filter every reviewer's item through the aims. Protect what the author asked for.
 When all stages are delivered, run whole-document read-through passes, section by section, each ending in numbered improvements, until the stopping condition holds and any minimum running time has passed.
 

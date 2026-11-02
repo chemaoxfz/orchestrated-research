@@ -10,7 +10,7 @@
     {
       "name": "orchestrated-research",
       "description": "Run a long research project as an orchestrator of dedicated agents, in stages, delivering a tutorial written like the main text of a high-impact paper and a technical companion with every derivation, proof and computation.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "author": { "name": "chemaoxfz" },
       "source": "./",
       "category": "productivity",

@@ -10,7 +10,7 @@
 #
 # Symlinks are the default, so `git pull` updates the skills everywhere at once.
 # Nothing is replaced unless this script installed it. A skill of the same name that
-# you already have is left alone, and the script tells you so.
+# you already have is left alone, and so is a copy you have edited. The script tells you so.
 #
 set -euo pipefail
 
@@ -57,6 +57,16 @@ ours() {
   esac
 }
 
+# Checksums of the files in a copy. The marker file holds the list made at install time.
+manifest() {
+  (cd "$1" && find . \( -name __pycache__ -o -name .DS_Store \) -prune -o -type f ! -name "$MARKER" -exec cksum {} + | LC_ALL=C sort)
+}
+
+# True when a copy made by this script is still exactly what it installed.
+unedited() {
+  [ -f "$1/$MARKER" ] && [ "$(manifest "$1")" = "$(cat "$1/$MARKER")" ]
+}
+
 done_count=0
 skipped=0
 for skill_path in "$REPO"/skills/*/; do
@@ -66,7 +76,10 @@ for skill_path in "$REPO"/skills/*/; do
     dest="$dir/$name"
     if [ "$MODE" = uninstall ]; then
       if ours "$dest"; then
-        if [ -L "$dest" ]; then rm "$dest"; else rm -rf "$dest"; fi
+        if [ -L "$dest" ]; then rm "$dest"
+        elif unedited "$dest"; then rm -rf "$dest"
+        else echo "left alone (you edited this copy)  $dest"; continue
+        fi
         echo "removed   $dest"; done_count=$((done_count+1))
       elif [ -e "$dest" ] || [ -L "$dest" ]; then
         echo "left alone (not ours)  $dest"
@@ -79,11 +92,17 @@ for skill_path in "$REPO"/skills/*/; do
         skipped=$((skipped+1))
         continue
       fi
-      if [ -L "$dest" ]; then rm "$dest"; else rm -rf "$dest"; fi
+      if [ -L "$dest" ]; then rm "$dest"
+      elif unedited "$dest"; then rm -rf "$dest"
+      else
+        echo "SKIPPED, you edited this copy  $dest" >&2
+        skipped=$((skipped+1))
+        continue
+      fi
     fi
     mkdir -p "$dir"
     if [ "$MODE" = copy ]; then
-      cp -R "${skill_path%/}" "$dest"; touch "$dest/$MARKER"; echo "copied    $dest"
+      cp -R "${skill_path%/}" "$dest"; manifest "$dest" > "$dest/$MARKER"; echo "copied    $dest"
     else
       ln -s "${skill_path%/}" "$dest"; echo "linked    $dest"
     fi

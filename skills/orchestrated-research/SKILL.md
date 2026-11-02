@@ -1,8 +1,9 @@
 ---
 name: orchestrated-research
 description: Run a long research project as an orchestrator of dedicated agents, in stages, delivering a human-readable tutorial written like the main text of a high-impact paper and a technical companion that holds every derivation, proof, computation and algorithm. Use when the author wants to develop a theory, method or computational result into a paired writeup over many sessions, to coordinate writer and verifier agents across Claude, Codex, DeepSeek or other tools, to keep agents with dedicated memory, or to resume such a project. A single question, a small edit or a one-off essay does not need this.
+license: MIT
 metadata:
-  version: "0.1.0"
+  version: "0.2.0"
   source: "https://github.com/chemaoxfz/orchestrated-research"
 ---
 
@@ -31,7 +32,7 @@ Keep them separate in every brief and every review.
 
 | Role | Lifetime | Owns | Runs as |
 | --- | --- | --- | --- |
-| Orchestrator | Dedicated | `PROJECT_STATE.md`, `AUTHOR-LEDGER.md`, `GOAL-RUN.md`, `roles/orchestrator/`, `revisions/orchestrator/` | The session the author talks to |
+| Orchestrator | Dedicated | `AGENTS.md`, `CLAUDE.md`, `PROJECT_STATE.md`, `AUTHOR-LEDGER.md`, `GOAL-RUN.md`, every `roles/<role>/CHARTER.md`, `roles/orchestrator/`, `revisions/orchestrator/` | The session the author talks to |
 | Tutorial writer | Dedicated | The tutorial, its figures, shared macros, `TUTORIAL-DESIGN.md`, `AUTHOR-PREFERENCES.md` | See [dedicated agents](references/dedicated-agents.md) |
 | Technical writer | Dedicated | The companion, `TECHNICAL-DESIGN.md`, `guidance/NOTATION.md`, `RESULTS-LEDGER.md`, code and data | See [dedicated agents](references/dedicated-agents.md) |
 | Fresh reader | Disposable | Its report | A new subagent for each review of the tutorial |

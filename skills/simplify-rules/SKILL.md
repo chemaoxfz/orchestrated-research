@@ -1,8 +1,9 @@
 ---
 name: simplify-rules
 description: Find the simpler result or rule hiding in a calculation, merge the rules that apply the same test, and carry the simplification through the examples and figures. Use when asked to simplify, merge or clean up rule boxes, worked calculations or notation in a tutorial, paper or technical writeup, when a section introduces several quantities that all serve one decision, or after a rule has been simplified and the sections that use it must follow.
+license: MIT
 metadata:
-  version: "0.1.0"
+  version: "0.2.0"
   source: "https://github.com/chemaoxfz/orchestrated-research"
 ---
 

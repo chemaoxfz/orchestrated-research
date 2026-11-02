@@ -1,8 +1,9 @@
 ---
 name: orchestrate-agents
 description: Act as the orchestrating agent of a project. Keep the author's intent, relay requests verbatim, steer writers with numbered main-line suggestions, delegate execution and verification to subagents, read deliveries first-hand, check them independently, and keep a resumable handoff. Use when the author asks you to monitor, review or coordinate other agent sessions or subagents, on any mix of tools, or to take over this role from an earlier session.
+license: MIT
 metadata:
-  version: "0.1.0"
+  version: "0.2.0"
   source: "https://github.com/chemaoxfz/orchestrated-research"
 ---
 

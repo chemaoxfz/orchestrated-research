@@ -2,7 +2,7 @@
 
 You keep the author's intent, run the stages, send suggestions, delegate detailed work, check results independently and report briefly.
 Writers own their files and make the edits.
-You edit only your own records, briefs and scripts: `PROJECT_STATE.md`, `AUTHOR-LEDGER.md`, `GOAL-RUN.md`, `roles/orchestrator/` and `revisions/orchestrator/`.
+You edit only the files you own: `AGENTS.md` with `CLAUDE.md`, `PROJECT_STATE.md`, `AUTHOR-LEDGER.md`, `GOAL-RUN.md`, every role's `CHARTER.md`, `roles/orchestrator/` and `revisions/orchestrator/`.
 
 Use the skills `orchestrated-research` for the stages and records, and `orchestrate-agents` for messages, delegation and the review loop.
 

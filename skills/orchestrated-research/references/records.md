@@ -40,12 +40,12 @@ If a fact belongs in an existing record, it goes there.
 
 ## The author ledger, in more detail
 
-A ledger exists because agents forget. On one long project it reached 383 rows, and it caught requests that every summary had dropped.
+A ledger exists because agents forget. On a long project, it catches requests that every summary has dropped.
 
 Build it from the verbatim messages, not from memory. One message usually holds several requests, so make one row per request.
 Keep each quote short and exact. `python3 tools/records.py ledger` checks every quote against `PROMPT-LOG.md`.
 
-When mining a transcript for author messages, read every record type the tool writes. A filter on the user role alone can miss messages sent during a running turn. On that project, it missed 23 of 45.
+When mining a transcript for author messages, read every record type the tool writes. A filter on the user role alone can miss messages sent during a running turn.
 
 Before accepting a reader's proposed cut, search the ledger for a row the text serves. Readers optimize for reading speed, and they cannot see why a sentence is there.
 Check each round against the verbatim requests too, because a later pass can quietly undo what an earlier pass delivered.

@@ -1,8 +1,9 @@
 ---
 name: iterate-research
 description: "Develop a research idea through bounded cycles of investigation, writeup, argument and presentation review, and evidence-based next-step selection. Keeps a resumable checkpoint and reports claim status separately from artifact status. Use for sustained research in any quantitative field, or to continue an existing research project to a time limit, effort budget, or target state. A single factual answer or isolated copy edit does not need this skill."
+license: MIT
 metadata:
-  version: "0.1.0"
+  version: "0.2.0"
   source: "https://github.com/chemaoxfz/orchestrated-research"
 ---
 

@@ -25,7 +25,7 @@ Readers and verifiers stay disposable on purpose. Their use comes from not knowi
 | **C. Separate live sessions** | Each writer has its own terminal. The orchestrator relays to it and watches it. | You also want to talk to the writers directly. This is how the workflow began. | Needs a watcher, and you manage the terminals. |
 
 You can mix them per writer and change later.
-`python3 tools/role.py rehydrate <role> --backend <other>` moves a role to a new thread on any backend. The role's files carry over, and the old thread stays in the roster's history. Moving to another backend clears the role's model and flags, because they belonged to the old vendor.
+`python3 tools/role.py rehydrate <role> --backend <other>` moves a role to a new thread on `codex`, `claude` or `dsh`, and `set <role> --backend <other>` does the same. The role's files carry over, and the old thread stays in the roster's history. Moving to another backend also clears the role's model and flags, because they belonged to the old vendor. A `codex-live` role needs a live session that you start: bind it with `set <role> --thread <UUID>`, and make its first message point it at its role folder.
 
 ## A. Dispatched threads
 
@@ -97,7 +97,7 @@ Keep watching live writers. The author may instruct them directly, and you need 
 | A Claude subagent's `memory: project` survives into a separate later session, including through the link to `roles/<role>/` | Saved in one `claude -p` session, recalled by the subagent in another, Claude Code 2.1.316 |
 | A role keeps its conversation across processes, on each of `claude`, `codex` and `dsh` | A detail given in turn 1, in conversation only, was recalled in turn 2 from a new process. `codex` and `dsh` were tested through `role.py`, and `claude` directly with `claude -p --resume`, because the writer in the `role.py` run also noted the detail in its handoff. |
 | A resumed writer can still write to the project | Each wrote a file on its resumed turn |
-| A dispatched Claude writer can build, and nothing more by default | In one turn through `role.py`, Claude Code 2.1.316: `latexmk` and `pdfinfo` ran, and `curl` was denied with "This command requires approval" |
+| A dispatched Claude writer runs its build without approval, and a command off its list is refused | In one turn through `role.py`, Claude Code 2.1.316: `latexmk` and `pdfinfo` ran, and `curl` was denied with "This command requires approval". Only these three commands were tried. |
 | A rehydrated role continues from its files | A new Codex thread on the same role read its role folder, took the durable word from `MEMORY.md`, and found the conversation-only detail by searching the saved message and reply files |
 | `role.py` cannot start a Codex writer from inside a Codex sandbox | From a parent in `workspace-write`, the nested `codex exec` failed as quoted above, `codex-cli` 0.166.0. `role.py` recorded the failure and did not resend. |
 | A Codex custom agent file loads and applies | Spawned by name, it quoted its instructions, `codex-cli` 0.166.0 |

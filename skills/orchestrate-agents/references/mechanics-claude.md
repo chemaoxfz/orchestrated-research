@@ -27,7 +27,7 @@ The scopes `user` and `local` use `~/.claude/agent-memory/<name>/` and `.claude/
     claude -p --agent tutorial-writer --output-format json --permission-mode acceptEdits --resume <session-id> "<next message>"
 
 The JSON result gives `session_id` and `result`.
-A writer needs its tools allowed in advance, because `-p` cannot ask. `tools/role.py` allows build and check commands by default: `latexmk`, `records.py`, checksums and the PDF tools. Replace that list with `python3 tools/role.py set <role> --args --allowedTools "Bash(latexmk *)" "Bash(python3 code/*)"`. Allowing `python3 code/*` lets the writer run whatever it writes, so that choice is yours.
+A writer needs its tools allowed in advance, because `-p` cannot ask. `tools/role.py` allows build and check commands by default: `latexmk`, `records.py`, checksums and the PDF tools. Replace that list with `python3 tools/role.py set <role> --args --allowedTools "Bash(latexmk *)" "Bash(python3 code/*)"`. Allowing `python3 code/*` lets the writer run whatever it writes, so that choice is yours. The default list is not a sandbox either. `latexmk` runs Perl configuration files, and the writer can edit files, so it can run code through `latexmk`.
 
 ## Live sessions
 

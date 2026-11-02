@@ -1,8 +1,9 @@
 ---
 name: polish-manuscript
 description: Audit, polish, tighten, restructure, harmonize or rewrite a quantitative manuscript and its figures to shareable rigor, with one complete argument as the unit of completion. LaTeX by default, and also Markdown or HTML. Use for section overhauls, dependency or narrative mapping, proof repair, hypothesis and scope review, notation or terminology cleanup, compactness passes, unresolved author annotations, purpose-first teaching of calculations, figure-prose synchronization, comparison rewrites and staged revisions. Do not use for a simple factual answer that requires no manuscript change.
+license: MIT
 metadata:
-  version: "0.1.0"
+  version: "0.2.0"
   source: "https://github.com/chemaoxfz/orchestrated-research"
 ---
 
@@ -43,7 +44,9 @@ This skill and its references use these terms with one meaning each.
 - The **design record** is the design file of the target document.
 - The **narrative spine** is the ordered account of a document's logical blocks in its design record, each with its question and result, whatever heading the design record gives it.
   A present entry describes the source as it stands.
-  A recommended entry, if there is one, proposes a changed order, and it stays a proposal until the author authorizes it.
+  A recommended entry, if there is one, proposes a changed order.
+  It stays a proposal until a recorded decision adopts it.
+  A rewrite the author asked for is such a decision. Otherwise the author decides, or the orchestrator when the author is absent.
   In a scaffolded project, the narrative spine is the part-by-part route of `TUTORIAL-DESIGN.md` or the present argument of `TECHNICAL-DESIGN.md`.
 - The **terminology register** is the project's list of recurring terms and symbols, each with its one definition site, such as `guidance/NOTATION.md` and the canonical terms in `AUTHOR-PREFERENCES.md`.
 

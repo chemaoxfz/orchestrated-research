@@ -1,7 +1,8 @@
 # Results ledger
 
 Every empirical or computational number used in either document has a row here.
-Published values get rows too, marked real and compared, with page locators.
+Published values get rows too, with page locators, marked compared.
+A published measurement is real, and a published simulation is synthetic.
 The technical writer owns this file.
 
 In a TeX source, cite a row in a comment beside the claim, like `% result: R1-FIT-ERROR`.

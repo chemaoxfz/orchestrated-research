@@ -261,6 +261,50 @@ class TestRole(Base):
         self.assertTrue((self.project / "roles" / "figure-writer" / "CHARTER.md").exists())
         self.assertEqual(self.role("add", "figure-writer", "--backend", "codex").returncode, 2)
 
+    def test_role_names_are_checked(self):
+        self.assertEqual(self.role("add", "../outside", "--backend", "codex").returncode, 2)
+        self.assertFalse((self.project / "outside").exists())
+
+    def test_added_claude_role_gets_an_agent_file_and_memory_link(self):
+        self.assertEqual(self.role("add", "proof-writer", "--backend", "claude").returncode, 0)
+        self.assertIn("name: proof-writer", (self.project / ".claude" / "agents" / "proof-writer.md").read_text())
+        link = self.project / ".claude" / "agent-memory" / "proof-writer"
+        self.assertEqual(link.resolve(), (self.project / "roles" / "proof-writer").resolve())
+
+    def test_parallel_turns_keep_each_others_threads(self):
+        names = ("tutorial-writer", "technical-writer")
+        for _ in range(5):
+            for name in names:
+                self.role("rehydrate", name)
+            procs = [subprocess.Popen([sys.executable, str(self.project / "tools" / "role.py"), "send", name, "--message-file", str(self.msg)],
+                                      cwd=self.project, env=self.env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL) for name in names]
+            self.assertEqual([proc.wait() for proc in procs], [0, 0])
+            roles = self.roster()["roles"]
+            self.assertEqual([roles[name]["thread"] for name in names], ["thread-codex-1", "thread-codex-1"])
+
+    def test_moving_backend_with_set_retires_the_thread(self):
+        self.role("send", "tutorial-writer", "--message-file", str(self.msg))
+        done = self.role("set", "tutorial-writer", "--backend", "claude")
+        self.assertIn("moved to the roster's history", done.stdout)
+        role = self.roster()["roles"]["tutorial-writer"]
+        self.assertIsNone(role["thread"])
+        self.assertEqual(role["history"][-1]["thread"], "thread-codex-1")
+        printed = self.role("send", "tutorial-writer", "--message-file", str(self.msg), "--dry-run").stdout
+        self.assertNotIn("--resume", printed)
+        self.assertIn("CHARTER.md", printed)
+
+    def test_rehydrating_to_a_live_session_says_how_to_bind_it(self):
+        self.role("send", "tutorial-writer", "--message-file", str(self.msg))
+        self.assertIn("--thread UUID", self.role("rehydrate", "tutorial-writer", "--backend", "codex-live").stdout)
+        sent = self.role("send", "tutorial-writer", "--message-file", str(self.msg))
+        self.assertEqual(sent.returncode, 2)
+        self.assertIn("needs a thread", sent.stderr)
+
+    def test_quick_turns_keep_separate_logs(self):
+        for _ in range(3):
+            self.assertEqual(self.role("send", "tutorial-writer", "--message-file", str(self.msg)).returncode, 0)
+        self.assertEqual(len(list((self.project / "roles" / "tutorial-writer" / "runs").glob("*.log"))), 3)
+
 
 class TestRecords(Base):
     def records(self, *args):
@@ -392,12 +436,25 @@ class TestInstaller(unittest.TestCase):
             self.assertEqual(self.run_install(home, "--copy").returncode, 0)
             copy = home / ".claude" / "skills" / "write-tutorial"
             self.assertFalse(copy.is_symlink())
-            (copy / "stale.txt").write_text("old")
             done = self.run_install(home, "--copy")
             self.assertNotIn("SKIPPED", done.stderr)
-            self.assertFalse((copy / "stale.txt").exists())
+            self.assertIn("copied", done.stdout)
             self.assertEqual(self.run_install(home, "--uninstall").returncode, 0)
             self.assertFalse(copy.exists())
+
+    def test_an_edited_copy_is_never_replaced_or_removed(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            home = Path(tmp)
+            self.assertEqual(self.run_install(home, "--copy").returncode, 0)
+            skill = home / ".claude" / "skills" / "write-tutorial" / "SKILL.md"
+            skill.write_text(skill.read_text() + "\nMy own rule.\n")
+            done = self.run_install(home, "--copy")
+            self.assertIn("SKIPPED, you edited this copy", done.stderr)
+            self.assertIn("My own rule.", skill.read_text())
+            done = self.run_install(home, "--uninstall")
+            self.assertIn("you edited this copy", done.stdout)
+            self.assertIn("My own rule.", skill.read_text())
+            self.assertFalse((home / ".claude" / "skills" / "write-companion").exists())
 
     def test_uninstall_reaches_every_location(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -432,6 +489,40 @@ class TestInstaller(unittest.TestCase):
             self.assertEqual(self.run_install(home, "--uninstall").returncode, 0)
             self.assertTrue(foreign.is_symlink())
             self.assertTrue(real.is_dir())
+
+
+class TestWatch(unittest.TestCase):
+    def test_a_watch_saves_its_start_and_replays_after_a_restart(self):
+        import sqlite3
+        import threading
+        with tempfile.TemporaryDirectory() as tmp:
+            home = Path(tmp)
+            thread = "watch-test-thread"
+            db = sqlite3.connect(home / "thread_history_1.sqlite")
+            db.execute("create table thread_items (thread_id text, rollout_ordinal integer, created_at_ms integer, item_type text, item_json text)")
+            db.execute("create table thread_turns (thread_id text, turn_id text, status text)")
+            db.execute("insert into thread_items values (?, 1, 0, 'agentMessage', ?)", (thread, json.dumps({"text": "old"})))
+            db.commit()
+            argv = [sys.executable, str(ROOT / "skills" / "orchestrate-agents" / "scripts" / "watch_threads.py"),
+                    "--codex-home", str(home), "--state-dir", str(home / "state"), f"writer={thread}"]
+
+            def first_line(seconds):
+                proc = subprocess.Popen(argv, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True)
+                timer = threading.Timer(seconds, proc.kill)
+                timer.start()
+                line = proc.stdout.readline()
+                proc.kill()
+                proc.wait()
+                proc.stdout.close()
+                timer.cancel()
+                return line
+
+            self.assertEqual(first_line(2), "")
+            self.assertEqual((home / "state" / f"watch.{thread[:8]}.state").read_text(), "1")
+            db.execute("insert into thread_items values (?, 2, 0, 'userMessage', ?)", (thread, json.dumps({"text": "new request"})))
+            db.commit()
+            db.close()
+            self.assertIn("Author->writer: new request", first_line(10))
 
 
 class TestPreflight(unittest.TestCase):

@@ -1,8 +1,9 @@
 ---
 name: write-tutorial
 description: Write or review a research tutorial in the style of the main text of a high-impact paper, with a reader who accepts every statement and wants to understand, follow, use and appreciate the method. Holds the tight house style for structure, procedure, examples, prose, naming, tables and figures. Use whenever you write, revise or review the human-readable tutorial of a research project, or the main text of a paper with a technical companion. Proofs and complete evidence belong to the companion, and write-companion holds their standard.
+license: MIT
 metadata:
-  version: "0.1.0"
+  version: "0.2.0"
   source: "https://github.com/chemaoxfz/orchestrated-research"
 ---
 
@@ -101,7 +102,8 @@ These rules hold inside a section, down to a paragraph. Across the document, the
 - **Motivate an assumption by what it buys.** Say what the assumption makes possible, and name the reduced object.
 - **Common case before special case,** and name all the alternatives.
 - **Define at first use,** where the reason for the definition is visible, not earlier. Then reuse it. A later procedure uses an earlier result rather than deriving it again.
-- **Give a condition for every outcome.** List the possible outcomes, and give each its condition. Readers usually want to know when each behavior happens, not what happens at given numbers. Numbers belong to plotted examples, and captions name the condition those numbers satisfy.
+- **Give a condition for every outcome.** List the possible outcomes, and give each its condition. Together the conditions cover every case, boundaries included. Readers usually want to know when each behavior happens, not what happens at given numbers. Numbers belong to plotted examples, and captions name the condition those numbers satisfy.
+- **An approximate result states its regime and its accuracy.** Say that a leading-order result is leading order, give the condition under which it holds, and give its error in a form the reader can use. A smooth change between two regimes is a crossover, not a switch. The derivation of the error belongs in the companion.
 - **Say what an event does to defined objects,** and how it changes the output.
 - **Constructive classification.** Give a positive, executable test, classify all possibilities, and read conditions directly when possible.
 - **A procedure is an algorithm with a stopping test.**
@@ -130,7 +132,7 @@ Remove whole statements that are redundant, unnecessary or irrelevant.
 The author: "we only remove redundancy that's above sentences, i.e. points or statements that's redundant or unnecessary or irrelevant."
 
 Common cases to remove: plan previews that repeat a section's question, restated standing assumptions, recaps after a box or display, special cases a definition already covers, one equation in several rearranged forms.
-A section emphasizes what its summary row lists. A reused step gets a one-line pointer, not its own box item.
+A reused step gets a one-line pointer, not its own box item.
 
 **Keep objects explicit.** Keep equations, tables and figures explicit unless a case is really repetitive. A proposed cut is a proposal: keep the object, with a caption starting "Candidate to cut", and do not use it in the narrative. Check every cut against the ledger of author requests before making it. The orchestrator settles a flagged cut at the next stage against that ledger, the before-state keeps the object recoverable, and the author can overturn the decision.
 

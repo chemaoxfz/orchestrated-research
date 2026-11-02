@@ -54,10 +54,10 @@ Each works alone, and `orchestrated-research` ties them together.
 
 ## Install
 
-This repository is private, so you need access to it.
+Clone the repository, then run the installer.
 
 ```bash
-gh repo clone chemaoxfz/orchestrated-research
+git clone https://github.com/chemaoxfz/orchestrated-research.git
 cd orchestrated-research
 ./install.sh               # links into ~/.agents/skills and ~/.claude/skills
 ./install.sh --all         # also ~/.cursor, ~/.gemini, ~/.codex, ~/.copilot
@@ -65,7 +65,7 @@ cd orchestrated-research
 ```
 
 The default is a symlink, so `git pull` updates every installation. Add `--copy` for a self-contained copy.
-The installer never replaces a skill of the same name that you already have. It tells you and moves on.
+The installer never replaces a skill it did not install, or a copy you have edited. It tells you and moves on.
 Restart your agent to load the skills.
 
 For Claude Code, you can use the plugin instead:
@@ -162,4 +162,4 @@ A TeX distribution with `latexmk`, and Poppler's `pdfinfo`, `pdffonts` and `pdft
 
 ## License
 
-Private, by invitation. See [NOTICE](NOTICE).
+MIT. See [LICENSE](LICENSE).

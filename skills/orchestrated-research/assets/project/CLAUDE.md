@@ -14,4 +14,5 @@ Edit rules there, not here.
 | Continue a writer in this session | `SendMessage` with its name or agent ID. |
 | A writer in another live session | `ListAgents`, then `SendMessage`. |
 
-Before compacting, write the checkpoint into `roles/orchestrator/HANDOFF.md`, so a resumed session loses nothing.
+Before compacting, write the checkpoint into your own role's `roles/<role>/HANDOFF.md`, so a resumed session loses nothing.
+The orchestrator's is `roles/orchestrator/HANDOFF.md`.

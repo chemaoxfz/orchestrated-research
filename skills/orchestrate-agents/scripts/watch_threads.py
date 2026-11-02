@@ -9,7 +9,7 @@ The Codex home defaults to $CODEX_HOME, then ~/.codex.
 Run it under a monitor that turns each stdout line into a notification.
 The last seen rollout ordinal of each thread is kept in DIR/watch.<uuid8>.state,
 so a re-armed watch replays everything that arrived meanwhile.
-A thread without a state file starts at its current end.
+A thread without a state file starts at its current end, and its state file is written at once.
 Author messages are printed in full. Messages from the orchestrator start "From <sender>:".
 The database is opened read-only. Uses internal Codex tables, tested on codex-cli 0.166.0.
 """
@@ -52,6 +52,9 @@ for th, name in THREADS.items():
         last[th] = int(open(state_file(th)).read().strip())
     except Exception:
         last[th] = q('select max(rollout_ordinal) from thread_items where thread_id=?', (th,))[0][0] or 0
+        # Save the starting point now. Otherwise a watch stopped before any new message
+        # would restart at the new end and skip what arrived in between.
+        open(state_file(th), 'w').write(str(last[th]))
     turn[th] = None
 while True:
     for th, name in THREADS.items():
